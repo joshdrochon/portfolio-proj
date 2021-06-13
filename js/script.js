@@ -1,18 +1,31 @@
 const HEADERTEXT = "Hi. I'm Josh."
 let i = 0
 
+const HERO_IMAGES = {
+    0: new Image(),
+    1: new Image(),
+}
+
+HERO_IMAGES["0"].src = './assets/img/pixeljosh.png'
+HERO_IMAGES["1"].src = './assets/img/pixeljosh2.png'
+
 class Sprite {
     constructor(x, y, relativeX = 0, relativeY = 0) {
         this.x = x;
         this.y = y
         this.relativeX = relativeX
         this.relativeY = relativeY
+        this.state = 0
     }
     moveLeft() {
         this.relativeX = +(this.relativeX - .2).toFixed(1)
     }
     moveRight() {
         this.relativeX = +(this.relativeX + .2).toFixed(1)
+    }
+    changeState() {
+        this.state = this.state === 0 ? 1 : 0
+        return this.state
     }
 }
 
@@ -36,7 +49,7 @@ const emptySq = '#7393b3'
 function createGameWorld() {
     hero = document.getElementById('hero')
 
-    hero.style.backgroundImage =  "url('./assets/img/pixeljosh.png')";
+    hero.appendChild(HERO_IMAGES["0"])
 
     const canvas = document.querySelector('#game-world')
     const context = canvas.getContext('2d')
@@ -71,8 +84,6 @@ for (let r = numOfRows - 1; r >= 0; r-=1){
     }
 }
 
-console.log(gameGrid)
-
 function drawWorld(context) {
     for (let r = 0; r < numOfRows; r++){
         for (let c = 0; c < numOfCols; c++){
@@ -103,18 +114,18 @@ function drawSquares(x, y, pattern, ctx) {
         ctx.fillStyle = emptySq
     }
     
-    // if (y == 3 && x == 5) {
-    //     let js = new Image()
-    //     js.src = "./assets/img/pixeljavascript.png"
-    //     js.onload = function() {
-    //         ctx.drawImage(this, x*sqSize, y*sqSize, 50, 50)
-    //     }
-    // }
+    if (y == 3 && x == 5) {
+        let js = new Image()
+        js.src = "./assets/img/pixeljavascript.png"
+        js.onload = function() {
+            ctx.drawImage(this, x*sqSize, y*sqSize, 50, 50)
+        }
+    }
 
 
     ctx.fillRect(x*sqSize, y*sqSize, sqSize, sqSize)
     // ctx.strokeStyle = "#000000"
-    ctx.strokeRect(x*sqSize, y*sqSize, sqSize, sqSize)
+    // ctx.strokeRect(x*sqSize, y*sqSize, sqSize, sqSize)
 }
 
 function typeWriter() {
@@ -175,11 +186,25 @@ function initGame() {
 function control(e) {
     e.preventDefault()
 
+    //remove current state node
+    hero.removeChild(HERO_IMAGES[JOSH.state])
+
+    //set and get new state 
+    let characterState = JOSH.changeState()
+
+    //set new state
+    hero.appendChild(HERO_IMAGES[characterState])
+    
     let gameworld = document.getElementById("game-world"),
     rain = document.getElementById("rain")
 
     if (e.keyCode === 32) {
+
+        jumpLoop()
+
         console.log("i am jumping")
+
+        
     }
     
     //move left
@@ -190,8 +215,7 @@ function control(e) {
         
         if (gameGrid[JOSH.relativeY + 1][nextLeftPosition] === 0) {
             JOSH.moveLeft()
-            hero.style.backgroundImage = `url('./assets/img/pixeljosh${hero.style.backgroundImage.indexOf("2") > -1 ? "" : "2"}.png')`
-        
+            
             if (GAMEWORLD.x === 0) {
                 if (JOSH.x > 0) {
                     JOSH.x -= 10
@@ -217,7 +241,6 @@ function control(e) {
 
         if (gameGrid[JOSH.relativeY + 1][nextRightPosition] === 0) {
             JOSH.moveRight()
-            hero.style.backgroundImage = `url('./assets/img/pixeljosh${hero.style.backgroundImage.indexOf("2") > -1 ? "" : "2"}.png')`
         
             if (JOSH.x >= 250) {
                 if (GAMEWORLD.x === -1200) {
