@@ -1,7 +1,5 @@
-#populate world with skills
-#remove block on spawn point
-#add jump mechanics
-#add table of skills
-#add logic to collect stills
-#display skills at bottom
-#add functionality to click on skill and display skill used
+#fix issue where high jump occurs when hugging edges
+#fix issue where player cannot fall into single empty blocks //remove single block spaces
+#fix issue where player can rebound right or left when only halfway to top of block
+
+#add skill sprites
