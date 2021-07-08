@@ -47,9 +47,6 @@ THEMEMUSIC.loop = true
 const JUMPSOUND = new Audio('./assets/audio/jump.wav')
 const COLLECTSOUND = new Audio('./assets/audio/collect.wav')
 
-
-let heroStance = 0
-
 let hero, 
 worldXPosition = 0
 
@@ -63,7 +60,7 @@ let canvas,
 function createGameWorld() {
     canvas = document.querySelector('#game-world')
     context = canvas.getContext('2d')
-    drawWorld({})
+    drawWorld()
 }
 
 let gameGrid = []
@@ -102,15 +99,15 @@ for (let r = numOfRows - 1; r >= 0; r -= 1) {
 }
 console.log(gameGrid)
 
-function drawWorld(player) {
+function drawWorld() {
     for (let r = 0; r < numOfRows; r++) {
         for (let c = 0; c < numOfCols; c++) {
-            drawSquares(c, r, gameGrid[r][c], player)
+            drawSquares(c, r, gameGrid[r][c])
         }
     }
 }
 
-function drawSquares(x, y, pattern, player) {
+function drawSquares(x, y, pattern) {
     context.fillRect(x * sqSize, y * sqSize, sqSize, sqSize)
     //empty
     if (pattern == 0) {
@@ -138,7 +135,7 @@ function drawSquares(x, y, pattern, player) {
 function drawPlayer() {
     // context.strokeRect(player.x, player.y, 50, 100)
     //image comes add odd dimensions
-    context.drawImage(HERO_IMAGES[heroStance], player.x - 15, player.y - 10)
+    context.drawImage(HERO_IMAGES[player.heroStance], player.x - 15, player.y - 10)
 }   
 
 let controller, 
@@ -153,12 +150,28 @@ function initGame() {
 
     player = {
         height: 100,
-        jumping: true,
+        jumping: false,
         width: 50,
         x: 100,
         x_velocity: 0,
         y: 250,
-        y_velocity: 0
+        y_velocity: 0,
+        counter: 0,
+        
+        heroStance: 0,
+
+        animate(controller) {
+
+            if (controller.up) this.counter = 0
+
+            if (controller.right || controller.left) {
+                this.counter +=1
+                if (this.counter >= 10) {
+                    this.heroStance = this.heroStance === 0 ? 1 : 0
+                    this.counter = 0
+                }
+            }
+        },
     }
 
     controller = {
@@ -178,7 +191,6 @@ function initGame() {
                 case 37:
                     event.preventDefault()
                     controller.left = key_state;
-                    heroStance = heroStance == 0 ? 1 : 0
                     break;
                 case 32:
                     event.preventDefault()
@@ -192,7 +204,6 @@ function initGame() {
                 case 39:
                     event.preventDefault()
                     controller.right = key_state;
-                    heroStance = heroStance == 0 ? 1 : 0
                     break;
                 default:
                     event.preventDefault()
@@ -204,6 +215,9 @@ function initGame() {
     };
 
     gameLoop = function () {
+
+        player.animate(controller)
+
         if (controller.up && player.jumping == false) {
             player.y_velocity -= 20;
             player.jumping = true;
@@ -286,7 +300,7 @@ function initGame() {
         rainBackground.style.left = worldXPosition + 'px'
         canvas.style.left = worldXPosition + 'px'
         
-        drawWorld(player)
+        drawWorld()
         drawPlayer()
 
         setTimeout(() => {
